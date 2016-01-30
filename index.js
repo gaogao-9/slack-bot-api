@@ -1,5 +1,4 @@
 var request = require('request');
-var Vow = require('vow');
 var extend = require('extend');
 var WebSocket = require('ws');
 var util = require('util');
@@ -17,7 +16,7 @@ function Bot(params) {
     this.name = params.name;
 
     assert(params.token, 'token must be defined');
-    this.login();
+    //this.login();
 }
 
 util.inherits(Bot, EventEmitter);
@@ -26,7 +25,7 @@ util.inherits(Bot, EventEmitter);
  * Starts a Real Time Messaging API session
  */
 Bot.prototype.login = function() {
-    this._api('rtm.start').then(function(data) {
+    return this._api('rtm.start').then(function(data) {
         this.wsUrl = data.url;
         this.self = data.self;
         this.team = data.team;
@@ -38,9 +37,15 @@ Bot.prototype.login = function() {
         this.emit('start');
 
         this.connect();
-    }.bind(this)).fail(function(data) {
-        assert(false, data.error);
-    }).done();
+    }.bind(this)).catch(function(data) {
+        try{
+            assert(false, data.error);
+        }
+        catch(err){
+            return Promise.reject(err);
+        }
+        return Promise.resolve(data);
+    });
 };
 
 /**
@@ -72,7 +77,7 @@ Bot.prototype.connect = function() {
  */
 Bot.prototype.getChannels = function() {
     if (this.channels) {
-        return Vow.fulfill({ channels: this.channels });
+        return Promise.resolve({ channels: this.channels });
     }
     return this._api('channels.list');
 };
@@ -83,7 +88,7 @@ Bot.prototype.getChannels = function() {
  */
 Bot.prototype.getUsers = function() {
     if (this.users) {
-        return Vow.fulfill({ members: this.users });
+        return Promise.resolve({ members: this.users });
     }
 
     return this._api('users.list');
@@ -95,7 +100,7 @@ Bot.prototype.getUsers = function() {
  */
 Bot.prototype.getGroups = function() {
     if (this.groups) {
-        return Vow.fulfill({ groups: this.groups });
+        return Promise.resolve({ groups: this.groups });
     }
 
     return this._api('groups.list');
@@ -258,7 +263,7 @@ Bot.prototype._post = function(type, name, text, params, cb) {
 
     return this[method](name).then(function(itemId) {
         return this.postMessage(itemId, text, params);
-    }.bind(this)).always(function(data) {
+    }.bind(this)).then(function(data) {
         if (cb) {
             cb(data._value);
         }
@@ -325,7 +330,7 @@ Bot.prototype._api = function(methodName, params) {
         form: this._preprocessParams(params)
     };
 
-    return new Vow.Promise(function(resolve, reject) {
+    return new Promise(function(resolve, reject) {
 
         request.post(data, function(err, request, body) {
             if (err) {
