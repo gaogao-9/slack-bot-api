@@ -37,21 +37,15 @@ Bot.prototype.login = function() {
         this.emit('start');
 
         this.connect();
-<<<<<<< HEAD
     }.bind(this)).catch(function(data) {
         try{
-            assert(false, data.error);
+            this.emit('error', new Error(data.error));
         }
         catch(err){
             return Promise.reject(err);
         }
         return Promise.resolve(data);
     });
-=======
-    }.bind(this)).fail(function(data) {
-        this.emit('error', new Error(data.error));
-    }.bind(this)).done();
->>>>>>> refs/remotes/mishk0/master
 };
 
 /**
