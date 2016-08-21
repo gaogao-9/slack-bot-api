@@ -19,19 +19,25 @@ npm install slackbots
 - `message` - event fired, when something happens in Slack. Description of all events <a href="https://api.slack.com/rtm">here</a>,
 - `open` - websocket connection is open and ready to communicate,
 - `close` - websocket connection is closed.
+- `error` - an error occurred while connecting to Slack
 
 ### Methods
 
-- `getChannels` (return: promise) - returns a list of all channels in the team,
-- `getUsers` (return: promise) - returns a list of all users in the team,
-- `getUser` (return: promise) - gets user by name,
-- `getChannel` (return: promise) - gets channel by name,
-- `getChatId` (return: promise) - it returns or opens and returns a direct message channel ID,
-- `postMessage` - posts a message to channel | group | user by ID,
-- `postTo(name, message [, params, callback])` - posts a message to channel | group | user by name,
-- `postMessageToChannel(name, message [, params, callback])` - posts a message to channel by name,
-- `postMessageToUser(name, message [, params, callback])` - posts a direct message by user name,
-- `postMessageToGroup(name, message [, params, callback])` - posts a message to private group by name.
+- `getChannels()` (return: promise) - returns a list of all channels in the team,
+- `getGroups()` (return: promise) - returns a list of all groups in the team,
+- `getUsers()` (return: promise) - returns a list of all users in the team,
+- `getChannel(name)` (return: promise) - gets channel by name,
+- `getGroup(name)` (return: promise) - gets group by name,
+- `getUser(name)` (return: promise) - gets user by name,
+- `getChannelId(name)` (return: promise) - gets channel ID by name,
+- `getGroupId(name)` (return: promise) - gets group ID by name,
+- `getUserId(name)` (return: promise) - gets user ID by name,
+- `getChatId(name)` (return: promise) - it returns or opens and returns a direct message channel ID,
+- `postMessage(id, text, params)` (return: promise) - posts a message to channel | group | user by ID,
+- `postTo(name, message [, params, callback])` (return: promise) - posts a message to channel | group | user by name,
+- `postMessageToUser(name, message [, params, callback])` (return: promise) - posts a direct message by user name,
+- `postMessageToGroup(name, message [, params, callback])` (return: promise) - posts a message to private group by name,
+- `postMessageToChannel(name, message [, params, callback])` (return: promise) - posts a message to channel by name.
 
 
 ## Usage
@@ -55,6 +61,10 @@ bot.on('start', function() {
     
     // define existing username instead of 'user_name'
     bot.postMessageToUser('user_name', 'meow!', params); 
+    
+    // If you add a 'slackbot' property, 
+    // you will post to another user's slackbot channel instead of a direct message
+    bot.postMessageToUser('user_name', 'meow!', { 'slackbot': true, icon_emoji: ':cat:' }); 
     
     // define private group instead of 'private_group', where bot exist
     bot.postMessageToGroup('private_group', 'meow!', params); 

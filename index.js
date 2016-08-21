@@ -37,6 +37,7 @@ Bot.prototype.login = function() {
         this.emit('start');
 
         this.connect();
+<<<<<<< HEAD
     }.bind(this)).catch(function(data) {
         try{
             assert(false, data.error);
@@ -46,6 +47,11 @@ Bot.prototype.login = function() {
         }
         return Promise.resolve(data);
     });
+=======
+    }.bind(this)).fail(function(data) {
+        this.emit('error', new Error(data.error));
+    }.bind(this)).done();
+>>>>>>> refs/remotes/mishk0/master
 };
 
 /**
@@ -140,6 +146,39 @@ Bot.prototype.getGroup = function(name) {
 };
 
 /**
+ * Get user by id
+ * @param {string} id
+ * @returns {object}
+ */
+Bot.prototype.getUserById = function(id) {
+    return this.getUsers().then(function(data) {
+        return find(data.members, { id: id });
+    });
+};
+
+/**
+ * Get channel by id
+ * @param {string} id
+ * @returns {object}
+ */
+Bot.prototype.getChannelById = function(id) {
+    return this.getChannels().then(function(data) {
+        return find(data.channels, { id: id });
+    });
+};
+
+/**
+ * Get group by id
+ * @param {string} id
+ * @returns {object}
+ */
+Bot.prototype.getGroupById = function(id) {
+    return this.getGroups().then(function(data) {
+        return find(data.groups, { id: id });
+    });
+};
+
+/**
  * Get channel ID
  * @param {string} name
  * @returns {string}
@@ -158,6 +197,17 @@ Bot.prototype.getChannelId = function(name) {
 Bot.prototype.getGroupId = function(name) {
     return this.getGroup(name).then(function(group) {
         return group.id;
+    });
+};
+
+/**
+ * Get user ID
+ * @param {string} name
+ * @returns {string}
+ */
+Bot.prototype.getUserId = function(name) {
+    return this.getUser(name).then(function(user) {
+        return user.id;
     });
 };
 
@@ -212,7 +262,7 @@ Bot.prototype.postMessage = function(id, text, params) {
  * @returns {vow.Promise}
  */
 Bot.prototype.postMessageToUser = function(name, text, params, cb) {
-    return this._post('user', name, text, params, cb);
+    return this._post((params || {}).slackbot ? 'slackbot' : 'user', name, text, params, cb);
 };
 
 /**
@@ -253,7 +303,8 @@ Bot.prototype._post = function(type, name, text, params, cb) {
     var method = ({
         'group': 'getGroupId',
         'channel': 'getChannelId',
-        'user': 'getChatId'
+        'user': 'getChatId',
+        'slackbot': 'getUserId'
     })[type];
 
     if (typeof params === 'function') {
